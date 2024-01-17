@@ -40,9 +40,6 @@
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
-                                <connections>
-                                    <segue destination="el8-o5-0G3" kind="show" id="EbI-qN-czz"/>
-                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -82,7 +79,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="shrek-2.jpg" translatesAutoresizingMaskIntoConstraints="NO" id="M81-3U-reU">
-                                <rect key="frame" x="0.0" y="114" width="393" height="694"/>
+                                <rect key="frame" x="0.0" y="70" width="393" height="738"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="ZNW-Bi-imJ"/>

@@ -6,8 +6,11 @@
 //
 
 import UIKit
+import QuickLook
 
-class DocumentTableViewController: UITableViewController {
+class DocumentTableViewController: UITableViewController, QLPreviewControllerDataSource {
+    
+    var fileList: [DocumentFile] = [];
     
     struct DocumentFile {
         var title: String
@@ -18,6 +21,7 @@ class DocumentTableViewController: UITableViewController {
     }
 
     override func viewDidLoad() {
+        fileList = listFileInBundle()
         super.viewDidLoad()
         
         self.title = "Liste des documents"
@@ -32,37 +36,48 @@ class DocumentTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // On retroune les images dans le contenu racine du projet convertis en DocumentFile grâce à la fonction listFileInBundle()
-        return listFileInBundle().count
+        return fileList.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DocumentCell", for: indexPath)
         
         // Onn récupère la bonne image depuis la fonction listFileInBundle() à l'aide de l'index indexPath entré en argument
-        let document = listFileInBundle()[indexPath.row]
+        let document = fileList[indexPath.row]
         
         cell.textLabel?.text = "\(document.title)"
         cell.detailTextLabel?.text = "\(document.size.formattedSize())"
+        cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
+        
         return cell
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let index = tableView.indexPathForSelectedRow {
-            if let destination: DocumentViewController = segue.destination as? DocumentViewController {
-                let selectedDocument = listFileInBundle()[index.row]
-                destination.imageName = selectedDocument.imageName
-            }
-        }
+    // On utilise plus un segue, nous devons donc utiliser le navigationController pour afficher le QLPreviewController
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let file = fileList[indexPath.row]
+        self.instantiateQLPreviewController(withUrl: file.url)
+    }
+    
+    func instantiateQLPreviewController(withUrl url: URL) {
+        let previewController = QLPreviewController()
+        previewController.dataSource = self
         
-        // 1. Récuperer l'index de la ligne sélectionnée
-        // 2. Récuperer le document correspondant à l'index
-        // 3. Cibler l'instance de DocumentViewController via le segue.destination
-        // 4. Caster le segue.destination en DocumentViewController
-        // 5. Remplir la variable imageName de l'instance de DocumentViewController avec le nom de l'image du document
+        if let index = tableView.indexPathForSelectedRow {
+            previewController.currentPreviewItemIndex = index.row
+            present(previewController, animated: true, completion: nil)
+        }
+    }
+
+    @objc(numberOfPreviewItemsInPreviewController:) func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+        return fileList.count
+    }
+
+    @objc(previewController:previewItemAtIndex:) func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+        let selectedDocument = listFileInBundle()[index]
+        return selectedDocument.url as QLPreviewItem
     }
     
     func listFileInBundle() -> [DocumentFile] {
-            
             let fm = FileManager.default
             let path = Bundle.main.resourcePath!
             let items = try! fm.contentsOfDirectory(atPath: path)
