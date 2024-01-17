@@ -7,8 +7,9 @@
 
 import UIKit
 import QuickLook
+import MobileCoreServices
 
-class DocumentTableViewController: UITableViewController, QLPreviewControllerDataSource {
+class DocumentTableViewController: UITableViewController, QLPreviewControllerDataSource, UIDocumentPickerDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
     
     var fileList: [DocumentFile] = [];
     
@@ -19,13 +20,54 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
         var url: URL
         var type: String
     }
-
+    
     override func viewDidLoad() {
         fileList = listFileInBundle()
         super.viewDidLoad()
         
         self.title = "Liste des documents"
-   }
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addImage))
+    }
+
+    @objc func addImage() {
+        let imagePickerController = UIImagePickerController()
+        imagePickerController.delegate = self
+        imagePickerController.sourceType = .photoLibrary
+        self.present(imagePickerController, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+
+        if let imageURL = info[UIImagePickerController.InfoKey.imageURL] as? URL {
+            copyFileToDocumentsDirectory(fromUrl: imageURL)
+
+            let imageInfos = try! imageURL.resourceValues(forKeys: [.contentTypeKey, .nameKey, .fileSizeKey])
+
+            fileList.append(
+                DocumentFile(
+                    title: imageInfos.name!,
+                    size: imageInfos.fileSize ?? 0,
+                    imageName: imageInfos.name!,
+                    url: imageURL,
+                    type: imageInfos.contentType!.description
+                )
+            )
+            
+            tableView.reloadData()
+        }
+    }
+    
+    func copyFileToDocumentsDirectory(fromUrl url: URL) {
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let destinationUrl = documentsDirectory.appendingPathComponent(url.lastPathComponent)
+
+        do {
+            try FileManager.default.copyItem(at: url, to: destinationUrl)
+        } catch {
+            print(error)
+        }
+    }
 
     // MARK: - Table view data source
 
