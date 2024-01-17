@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="22155" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="RO7-U5-jFS">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22131"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Document Table View Controller-->
+        <!--DocumentTableViewController-->
         <scene sceneID="noq-7N-HAH">
             <objects>
-                <tableViewController id="nag-HB-Prk" customClass="DocumentTableViewController" customModule="Projet_IOS" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController title="DocumentTableViewController" id="nag-HB-Prk" customClass="DocumentTableViewController" customModule="Projet_IOS" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" id="zfu-bU-rJg">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="DocumentCell" textLabel="Sly-zb-Swp" detailTextLabel="3HZ-dx-dAg" style="IBUITableViewCellStyleSubtitle" id="7x2-ZK-HOl">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="DocumentCell" textLabel="Sly-zb-Swp" detailTextLabel="3HZ-dx-dAg" style="IBUITableViewCellStyleSubtitle" id="7x2-ZK-HOl">
                                 <rect key="frame" x="0.0" y="50" width="393" height="43.666667938232422"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7x2-ZK-HOl" id="IYf-eW-Nun">
-                                    <rect key="frame" x="0.0" y="0.0" width="393" height="43.666667938232422"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="362.66666666666669" height="43.666667938232422"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Sly-zb-Swp">
@@ -39,6 +40,9 @@
                                         </label>
                                     </subviews>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <segue destination="el8-o5-0G3" kind="show" id="EbI-qN-czz"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
@@ -46,13 +50,62 @@
                             <outlet property="delegate" destination="nag-HB-Prk" id="eOI-zh-6L3"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="tKf-eu-NY7"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Xry-qa-vyU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-343" y="-704"/>
         </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="cDg-LN-Pe3">
+            <objects>
+                <navigationController id="RO7-U5-jFS" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="k1v-YR-rlk">
+                        <rect key="frame" x="0.0" y="59" width="393" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <navigationBarAppearance key="standardAppearance"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="nag-HB-Prk" kind="relationship" relationship="rootViewController" id="qfR-I0-cW6"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="XRs-uW-XWb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1389" y="-794"/>
+        </scene>
+        <!--DocumentViewController-->
+        <scene sceneID="v6l-BJ-0QF">
+            <objects>
+                <viewController title="DocumentViewController" id="el8-o5-0G3" customClass="DocumentViewController" customModule="Projet_IOS" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="xt9-v5-wYc">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="shrek-2.jpg" translatesAutoresizingMaskIntoConstraints="NO" id="M81-3U-reU">
+                                <rect key="frame" x="0.0" y="114" width="393" height="694"/>
+                            </imageView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="ZNW-Bi-imJ"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="M81-3U-reU" firstAttribute="leading" secondItem="ZNW-Bi-imJ" secondAttribute="leading" id="IyC-Yl-xbJ"/>
+                            <constraint firstItem="M81-3U-reU" firstAttribute="top" secondItem="ZNW-Bi-imJ" secondAttribute="top" constant="11" id="b1O-DA-Rjy"/>
+                            <constraint firstItem="ZNW-Bi-imJ" firstAttribute="bottom" secondItem="M81-3U-reU" secondAttribute="bottom" constant="10" id="rrA-nm-V6s"/>
+                            <constraint firstItem="M81-3U-reU" firstAttribute="centerX" secondItem="xt9-v5-wYc" secondAttribute="centerX" id="wmF-uc-FkC"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" customizationIdentifier="DetailsPhoto" id="ory-PK-Rpf"/>
+                    <connections>
+                        <outlet property="ImageView" destination="M81-3U-reU" id="AMa-UF-TEA"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="NCk-us-nHA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-260.30534351145036" y="-1381.6901408450706"/>
+        </scene>
     </scenes>
     <resources>
+        <image name="shrek-2.jpg" width="675" height="1200"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

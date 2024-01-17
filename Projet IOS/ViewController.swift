@@ -7,6 +7,19 @@
 
 import UIKit
 
+
+extension Int {
+    func formattedSize() -> String {
+        let formatter = ByteCountFormatter()
+        formatter.allowedUnits = .useAll
+        formatter.countStyle = .file
+        formatter.includesUnit = true
+        formatter.isAdaptive = true
+
+        return formatter.string(fromByteCount: Int64(self))
+    }
+}
+
 class ViewController: UIViewController {
 
     override func viewDidLoad() {

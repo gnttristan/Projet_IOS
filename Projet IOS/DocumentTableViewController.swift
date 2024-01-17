@@ -9,7 +9,7 @@ import UIKit
 
 class DocumentTableViewController: UITableViewController {
     
-    struct DocumentTable {
+    struct DocumentFile {
         var title: String
         var size: Int
         var imageName: String? = nil
@@ -19,25 +19,72 @@ class DocumentTableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
-    }
+        
+        self.title = "Liste des documents"
+   }
 
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
         // #warning Incomplete implementation, return the number of sections
-        return 0
+        return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return 0
+        // On retroune les images dans le contenu racine du projet convertis en DocumentFile grâce à la fonction listFileInBundle()
+        return listFileInBundle().count
     }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "DocumentCell", for: indexPath)
+        
+        // Onn récupère la bonne image depuis la fonction listFileInBundle() à l'aide de l'index indexPath entré en argument
+        let document = listFileInBundle()[indexPath.row]
+        
+        cell.textLabel?.text = "\(document.title)"
+        cell.detailTextLabel?.text = "\(document.size.formattedSize())"
+        return cell
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if let index = tableView.indexPathForSelectedRow {
+            if let destination: DocumentViewController = segue.destination as? DocumentViewController {
+                let selectedDocument = listFileInBundle()[index.row]
+                destination.imageName = selectedDocument.imageName
+            }
+        }
+        
+        // 1. Récuperer l'index de la ligne sélectionnée
+        // 2. Récuperer le document correspondant à l'index
+        // 3. Cibler l'instance de DocumentViewController via le segue.destination
+        // 4. Caster le segue.destination en DocumentViewController
+        // 5. Remplir la variable imageName de l'instance de DocumentViewController avec le nom de l'image du document
+    }
+    
+    func listFileInBundle() -> [DocumentFile] {
+            
+            let fm = FileManager.default
+            let path = Bundle.main.resourcePath!
+            let items = try! fm.contentsOfDirectory(atPath: path)
+            
+            var documentListBundle = [DocumentFile]()
+        
+            for item in items {
+                if !item.hasSuffix("DS_Store") && item.hasSuffix(".jpg") {
+                    let currentUrl = URL(fileURLWithPath: path + "/" + item)
+                    let resourcesValues = try! currentUrl.resourceValues(forKeys: [.contentTypeKey, .nameKey, .fileSizeKey])
+                       
+                    documentListBundle.append(DocumentFile(
+                        title: resourcesValues.name!,
+                        size: resourcesValues.fileSize ?? 0,
+                        imageName: item,
+                        url: currentUrl,
+                        type: resourcesValues.contentType!.description)
+                    )
+                }
+            }
+            return documentListBundle
+        }
 
     /*
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
