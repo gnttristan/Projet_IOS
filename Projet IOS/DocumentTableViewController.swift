@@ -9,11 +9,44 @@ import UIKit
 import QuickLook
 import MobileCoreServices
 
-class DocumentTableViewController: UITableViewController, QLPreviewControllerDataSource, UIDocumentPickerDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
+class DocumentTableViewController: UITableViewController, QLPreviewControllerDataSource, UIDocumentPickerDelegate, UIImagePickerControllerDelegate, UISearchBarDelegate, UINavigationControllerDelegate {
     
-    var fileList: [DocumentFile] = [];
+    @IBOutlet weak var searchBar: UISearchBar!
     
-    struct DocumentFile {
+    var fileList: [DocumentFile] = []
+    
+    var importedFileList: [DocumentFile] = [] {
+        didSet {
+            saveImportedFileList()
+        }
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        fileList = listFileInBundle().filter { $0.title.lowercased().contains(searchText.lowercased()) }
+        tableView.reloadData()
+    }
+    
+    func saveImportedFileList() {
+        let storageImages = try? JSONEncoder().encode(importedFileList)
+        UserDefaults.standard.set(storageImages, forKey: "importedFileList")
+        
+        if let savedData = UserDefaults.standard.data(forKey: "importedFileList") {
+            if let loadedFileList = try? JSONDecoder().decode([DocumentFile].self, from: savedData) {
+            }
+        }
+    }
+    
+    func loadFileList() -> [DocumentFile] {
+        if let savedData = UserDefaults.standard.data(forKey: "importedFileList") {
+            if let loadedFileList = try? JSONDecoder().decode([DocumentFile].self, from: savedData) {
+                print(loadedFileList)
+                return loadedFileList
+            }
+        }
+        return [] as [DocumentFile]
+    }
+    
+    struct DocumentFile: Codable {
         var title: String
         var size: Int
         var imageName: String? = nil
@@ -22,10 +55,17 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
     }
     
     override func viewDidLoad() {
-        fileList = listFileInBundle()
         super.viewDidLoad()
         
         self.title = "Liste des documents"
+        searchBar.placeholder = "Your placeholder"
+        searchBar.delegate = self
+        
+        fileList = listFileInBundle()
+        importedFileList = loadFileList()
+        
+        tableView.reloadData()
+
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addImage))
     }
 
@@ -44,7 +84,7 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
 
             let imageInfos = try! imageURL.resourceValues(forKeys: [.contentTypeKey, .nameKey, .fileSizeKey])
 
-            fileList.append(
+            importedFileList.append(
                 DocumentFile(
                     title: imageInfos.name!,
                     size: imageInfos.fileSize ?? 0,
@@ -69,29 +109,54 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
         }
     }
 
-    // MARK: - Table view data source
-
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 1
+        return 2
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // On retroune les images dans le contenu racine du projet convertis en DocumentFile grâce à la fonction listFileInBundle()
-        return fileList.count
+        switch section {
+        case 0:
+            return fileList.count
+        case 1:
+            return importedFileList.count
+        default:
+            return 0
+        }
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DocumentCell", for: indexPath)
-        
-        // Onn récupère la bonne image depuis la fonction listFileInBundle() à l'aide de l'index indexPath entré en argument
-        let document = fileList[indexPath.row]
-        
+
+        var document: DocumentFile
+
+        switch indexPath.section {
+        case 0:
+            document = fileList[indexPath.row]
+        case 1:
+            document = importedFileList[indexPath.row]
+        default:
+            fatalError("Invalid section")
+        }
+
         cell.textLabel?.text = "\(document.title)"
         cell.detailTextLabel?.text = "\(document.size.formattedSize())"
         cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
-        
+
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+
+        let sectionName: String
+        switch section {
+            case 0:
+                sectionName = NSLocalizedString("Bundles", comment: "Bundles")
+            case 1:
+                sectionName = NSLocalizedString("Importations", comment: "Importations")
+            default:
+                sectionName = ""
+        }
+        return sectionName
     }
     
     // On utilise plus un segue, nous devons donc utiliser le navigationController pour afficher le QLPreviewController
@@ -142,60 +207,5 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
             }
             return documentListBundle
         }
-
-    /*
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
-
-        // Configure the cell...
-
-        return cell
-    }
-    */
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
