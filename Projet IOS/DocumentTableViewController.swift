@@ -13,6 +13,8 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
     
     @IBOutlet weak var searchBar: UISearchBar!
     
+    var fileListAfterFilter: [DocumentFile] = []
+    
     var fileList: [DocumentFile] = []
     
     var importedFileList: [DocumentFile] = [] {
@@ -21,25 +23,32 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
         }
     }
     
+    var importedFileListAfterFilter: [DocumentFile] = []
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        fileList = listFileInBundle().filter { $0.title.lowercased().contains(searchText.lowercased()) }
+        if (searchText.isEmpty) {
+            fileListAfterFilter = fileList
+            importedFileListAfterFilter = importedFileList
+            tableView.reloadData()
+            
+            return
+        }
+        
+        fileListAfterFilter = fileList.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+        importedFileListAfterFilter = importedFileList.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+        
         tableView.reloadData()
     }
     
     func saveImportedFileList() {
         let storageImages = try? JSONEncoder().encode(importedFileList)
         UserDefaults.standard.set(storageImages, forKey: "importedFileList")
-        
-        if let savedData = UserDefaults.standard.data(forKey: "importedFileList") {
-            if let loadedFileList = try? JSONDecoder().decode([DocumentFile].self, from: savedData) {
-            }
-        }
+        searchBar(searchBar, textDidChange: searchBar.text ?? "")
     }
     
     func loadFileList() -> [DocumentFile] {
         if let savedData = UserDefaults.standard.data(forKey: "importedFileList") {
             if let loadedFileList = try? JSONDecoder().decode([DocumentFile].self, from: savedData) {
-                print(loadedFileList)
                 return loadedFileList
             }
         }
@@ -63,6 +72,8 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
         
         fileList = listFileInBundle()
         importedFileList = loadFileList()
+        fileListAfterFilter = fileList
+        importedFileListAfterFilter = importedFileList
         
         tableView.reloadData()
 
@@ -116,9 +127,9 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0:
-            return fileList.count
+            return fileListAfterFilter.count
         case 1:
-            return importedFileList.count
+            return importedFileListAfterFilter.count
         default:
             return 0
         }
@@ -131,9 +142,9 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
 
         switch indexPath.section {
         case 0:
-            document = fileList[indexPath.row]
+            document = fileListAfterFilter[indexPath.row]
         case 1:
-            document = importedFileList[indexPath.row]
+            document = importedFileListAfterFilter[indexPath.row]
         default:
             fatalError("Invalid section")
         }
@@ -161,7 +172,7 @@ class DocumentTableViewController: UITableViewController, QLPreviewControllerDat
     
     // On utilise plus un segue, nous devons donc utiliser le navigationController pour afficher le QLPreviewController
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let file = fileList[indexPath.row]
+        let file = fileListAfterFilter[indexPath.row]
         self.instantiateQLPreviewController(withUrl: file.url)
     }
     
